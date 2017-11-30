@@ -27,4 +27,4 @@ These compendia are likely relevant in many Physics, Mathematics and Engineering
 ### Contact Information
 
 Contact me via email if you have any questions or suggestions:
-[gabric@uio.no](gabric@uio.no)
+<gabric@uio.no>
