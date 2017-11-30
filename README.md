@@ -1,37 +1,30 @@
-## Welcome to GitHub Pages
+## Gabriel's Compendia
 
-You can use the [editor on GitHub](https://github.com/GabrielSCabrera/Compendia/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+As an undergraduate of Physics at the University of Oslo, I have found that it is often difficult to approach some of the topics in our course literature due to:
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+- Unintuitive Explanations
 
-### Markdown
+- Cluttered Information
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+- Content Dilution from Examples
 
-```markdown
-Syntax highlighted code block
+Although examples are vital to understanding a subject, I find that it is very useful to have the curriculum of a course independent of such examples since it allows for a better overall understanding of a subject due to the fact that it allows for:
 
-# Header 1
-## Header 2
-### Header 3
+- Clearer Context
 
-- Bulleted
-- List
+- Quick Access
 
-1. Numbered
-2. List
+- Overall Perspective
 
-**Bold** and _Italic_ and `Code` text
+As a result, I began compressing my notes into as compact a form as I could, while still retaining the information needed to have an intuitive understanding of the material.  
 
-[Link](url) and ![Image](src)
-```
+Since I tend to share these with my classmates, I figured it would be a good idea to have an updated repository available to those who wish to access the latest versions of these notes.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### Curriculum
 
-### Jekyll Themes
+These compendia are likely relevant in many Physics, Mathematics and Engineering courses, but are specifically designed for the curriculum in the [Physics and Astronomy](http://www.uio.no/studier/program/fysikk-astronomi/) Undergraduate Program at the [University of Oslo](http://www.uio.no/).
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/GabrielSCabrera/Compendia/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+### Contact Information
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Contact me via email if you have any questions or suggestions:
+[gabric@uio.no](gabric@uio.no)
