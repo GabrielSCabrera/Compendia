@@ -1,3 +1,0 @@
-Compile a file using the command:
-
-chmod a+x FILENAME.sh

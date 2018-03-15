@@ -1,2 +1,0 @@
-time=$(date)
-time=`date`
