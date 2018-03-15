@@ -1,0 +1,2 @@
+time=$(date)
+time=`date`
