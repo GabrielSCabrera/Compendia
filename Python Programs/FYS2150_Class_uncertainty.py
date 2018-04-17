@@ -1,5 +1,4 @@
 import numpy as np
-import sys, re
 
 def zeros(x):
     if not isinstance(x, int):
