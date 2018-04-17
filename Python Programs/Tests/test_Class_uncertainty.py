@@ -1,6 +1,6 @@
-from Class_uncertainty import uFloat as uF
-from Class_uncertainty import uArray as uA
-import Class_uncertainty as cU
+from FYS2150_Class_uncertainty import uFloat as uF
+from FYS2150_Class_uncertainty import uArray as uA
+import FYS2150_Class_uncertainty as cU
 import numpy as np
 
 def eq(x,y):
