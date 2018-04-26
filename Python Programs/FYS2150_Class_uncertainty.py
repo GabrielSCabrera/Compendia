@@ -1,5 +1,13 @@
 import numpy as np
 
+def list_to_uArray(a, uncertainty):
+    if not isinstance(a, (list, tuple, np.ndarray)):
+        raise TypeError('Can only convert objects of type <list>, <tuple>, and <np.ndarray>')
+    new_a = []
+    for i in a:
+        new_a.append(i, uncertainty)
+    return uArray(new_a)
+
 def zeros(x):
     if not isinstance(x, int):
         error = 'zeros function only accepts a length of type <int>'
