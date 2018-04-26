@@ -1,3 +1,5 @@
+import numpy as np
+
 def tex_table(a, caption, label, titles, vbars = None, hbars = None,
 sigfigs = 0.3):
     '''
@@ -38,7 +40,7 @@ sigfigs = 0.3):
     if hbars is None:
         hbars = np.zeros(len(a[0]))
         hbars[-1] = 1
-    if isinstance(sigfigs, int):
+    if isinstance(sigfigs, (float, int)):
         sigfigs = np.ones(a_len)*sigfigs
     string = r'\begin{figure}[H]'
     string += '\n\\centering\n'
@@ -56,7 +58,8 @@ sigfigs = 0.3):
                 string += 'c'
             elif i == 1:
                 string += 'c|'
-    string += '}\n\\hline\n'
+        string += '}'
+    string += '\n\\hline\n'
     for n, title in enumerate(titles):
         string += '{} '.format(title)
         if n < a_len - 1:
@@ -64,7 +67,10 @@ sigfigs = 0.3):
     string += '\\\\\n\\hline\n\\hline\n'
     for i in range(len(a[0])):
         for n,(j,k) in enumerate(zip(a[:,i], sigfigs)):
-            string += '{:{width}f} '.format(j, width = k)
+            if isinstance(j, (int, float)):
+                string += '{:{width}f} '.format(j, width = k)
+            else:
+                string += '{} '.format(j)
             if n < a_len - 1:
                 string += '& '
         if hbars[i] == 1:
