@@ -201,8 +201,8 @@ class uFloat(object):
     def __truediv__(self, x):
         x = self._get_type(x)
         if x.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})')\
-            .format(self.value, x.value)
+            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+            .format(self.value, x.value))
         value = self.value/x.value
         uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
         (x.relative_uncertainty)**2)
@@ -211,8 +211,8 @@ class uFloat(object):
     def __rtruediv__(self, x):
         x = self._get_type(x)
         if self.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})')\
-            .format(x.value, self.value)
+            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+            .format(x.value, self.value))
         value = x.value/self.value
         uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
         (x.relative_uncertainty)**2)
@@ -221,8 +221,8 @@ class uFloat(object):
     def __floordiv__(self, x):
         x = self._get_type(x)
         if x.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})')\
-            .format(self.value, x.value)
+            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+            .format(self.value, x.value))
         value = self.value//x.value
         uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
         (x.relative_uncertainty)**2)
@@ -231,8 +231,8 @@ class uFloat(object):
     def __rfloordiv__(self, x):
         x = self._get_type(x)
         if self.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})')\
-            .format(x.value, self.value)
+            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+            .format(x.value, self.value))
         value = x.value//self.value
         uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
         (x.relative_uncertainty)**2)
@@ -241,8 +241,8 @@ class uFloat(object):
     def __mod__(self, x):
         x = self._get_type(x)
         if x.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})')\
-            .format(self.value, x.value)
+            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+            .format(self.value, x.value))
         value = self.value % x.value
         uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
         (x.relative_uncertainty)**2)
@@ -251,8 +251,8 @@ class uFloat(object):
     def __rmod__(self, x):
         x = self._get_type(x)
         if self.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})')\
-            .format(x.value, self.value)
+            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+            .format(x.value, self.value))
         value = x.value % self.value
         uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
         (x.relative_uncertainty)**2)
