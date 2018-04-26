@@ -76,11 +76,17 @@ sigfigs = 0.3):
                 if j.uncertainty != 0:
                     for m,l in enumerate(temp[0]):
                         if l == 'e':
-                            temp[0] = temp[0][:m] + r' \times 10^{' + str(int(temp[0][m+1:])) + '}'
+                            if float(temp[0][:m]) == 1:
+                                temp[0] = r'10^{' + str(int(temp[0][m+1:])) + '}'
+                            else:
+                                temp[0] = temp[0][:m] + r' \times 10^{' + str(int(temp[0][m+1:])) + '}'
                             break
                     for m,l in enumerate(temp[1]):
                         if l == 'e':
-                            temp[1] = temp[1][:m] + r' \times 10^{' + str(int(temp[1][m+1:])) + '}'
+                            if float(temp[1][:m]) == 1:
+                                temp[1] = r'10^{' + str(int(temp[1][m+1:])) + '}'
+                            else:
+                                temp[1] = temp[1][:m] + r' \times 10^{' + str(int(temp[1][m+1:])) + '}'
                             break
                     string += '$' + temp[0] + ' \pm ' + temp[1] + '$ '
                 else:
