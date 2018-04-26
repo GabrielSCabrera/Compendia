@@ -5,7 +5,7 @@ def list_to_uArray(a, uncertainty):
         raise TypeError('Can only convert objects of type <list>, <tuple>, and <np.ndarray>')
     new_a = []
     for i in a:
-        new_a.append(i, uncertainty)
+        new_a.append(uFloat(i, uncertainty))
     return uArray(new_a)
 
 def zeros(x):
@@ -139,7 +139,7 @@ class uFloat(object):
     '''INPLACE OPERATORS'''
 
     def __iadd__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot add an object of type<uFloat>'
             error += ' to object of type<{}>'.format(type(x))
             raise TypeError(error)
@@ -147,7 +147,7 @@ class uFloat(object):
             return self.__add__(x)
 
     def __isub__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot subtract an object of type<uFloat>'
             error += ' from object of type<{}>'.format(type(x))
             raise TypeError(error)
@@ -155,7 +155,7 @@ class uFloat(object):
             return self.__sub__(x)
 
     def __imul__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot multiply an object of type<uFloat>'
             error += ' with object of type<{}>'.format(type(x))
             raise TypeError(error)
@@ -163,7 +163,7 @@ class uFloat(object):
             return self.__mul__(x)
 
     def __itruediv__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot multiply an object of type<uFloat>'
             error += ' with object of type<{}>'.format(type(x))
             raise TypeError(error)
@@ -171,7 +171,7 @@ class uFloat(object):
             return self.__truediv__(x)
 
     def __ifloordiv__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot multiply an object of type<uFloat>'
             error += ' with object of type<{}>'.format(type(x))
             raise TypeError(error)
@@ -179,7 +179,7 @@ class uFloat(object):
             return self.__floordiv__(x)
 
     def __imod__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot multiply an object of type<uFloat>'
             error += ' with object of type<{}>'.format(type(x))
             raise TypeError(error)
@@ -187,7 +187,7 @@ class uFloat(object):
             return self.__mod__(x)
 
     def __ipow__(self, x):
-        if not isinstance(x, (float, int, long, uFloat)):
+        if not isinstance(x, (float, int, uFloat)):
             error = 'Cannot multiply an object of type<uFloat>'
             error += ' with object of type<{}>'.format(type(x))
             raise TypeError(error)

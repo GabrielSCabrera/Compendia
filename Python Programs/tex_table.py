@@ -42,7 +42,7 @@ sigfigs = 0.3):
         hbars[-1] = 1
     if isinstance(sigfigs, (float, int)):
         sigfigs = np.ones(a_len)*sigfigs
-    string = r'\begin{figure}[H]'
+    string = r'\begin{table}[H]'
     string += '\n\\centering\n'
     string += '\\caption{{{}\\label{{{}}}}}\n'.format(caption, label)
     string += r'\begin{tabular}{'
@@ -68,7 +68,23 @@ sigfigs = 0.3):
     for i in range(len(a[0])):
         for n,(j,k) in enumerate(zip(a[:,i], sigfigs)):
             if isinstance(j, (int, float)):
-                string += '{:{width}f} '.format(j, width = k)
+                string += '{:{width}f} '.format(float(j), width = k)
+            elif isinstance(j, (uFloat)):
+                temp = '{:{width}g} '.format(j, width = k)
+                temp = (temp.split('±'))
+                temp[0], temp[1] = temp[0].strip(), temp[1].strip()
+                if j.uncertainty != 0:
+                    for m,l in enumerate(temp[0]):
+                        if l == 'e':
+                            temp[0] = temp[0][:m] + r' \times 10^{' + str(int(temp[0][m+1:])) + '}'
+                            break
+                    for m,l in enumerate(temp[1]):
+                        if l == 'e':
+                            temp[1] = temp[1][:m] + r' \times 10^{' + str(int(temp[1][m+1:])) + '}'
+                            break
+                    string += '$' + temp[0] + ' \pm ' + temp[1] + '$ '
+                else:
+                    string += '$' + temp[0] + '$ '
             else:
                 string += '{} '.format(j)
             if n < a_len - 1:
@@ -79,5 +95,5 @@ sigfigs = 0.3):
             string += '\\\\\n\n'
     string += r'\end{tabular}'
     string += '\n'
-    string += r'\end{figure}'
+    string += r'\end{table}'
     return string
