@@ -1,9 +1,11 @@
 import numpy as np
 
-def list_to_uArray(a, uncertainty):
+def list_to_uArray(a, uncertainty = None):
     if not isinstance(a, (list, tuple, np.ndarray)):
         raise TypeError('Can only convert objects of type <list>, <tuple>, and <np.ndarray>')
     new_a = []
+    if uncertainty is None:
+        uncertainty = np.std(np.array(a))
     for i in a:
         new_a.append(uFloat(i, uncertainty))
     return uArray(new_a)
@@ -11,12 +13,14 @@ def list_to_uArray(a, uncertainty):
 def zeros(x):
     if not isinstance(x, int):
         error = 'zeros function only accepts a length of type <int>'
+        raise TypeError(error)
     a = [uFloat(0,0)]*x
     return uArray(a)
 
 def ones(x):
     if not isinstance(x, int):
         error = 'ones function only accepts a length of type <int>'
+        raise TypeError(error)
     a = [uFloat(1,1)]*x
     return uArray(a)
 
