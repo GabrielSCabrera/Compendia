@@ -1,4 +1,8 @@
+import matplotlib.pyplot as plt
+from matplotlib import rc
 import numpy as np
+import warnings
+rc('text', usetex = True)
 
 def list_to_uArray(a, uncertainty = None):
     if not isinstance(a, (list, tuple, np.ndarray)):
@@ -6,8 +10,15 @@ def list_to_uArray(a, uncertainty = None):
     new_a = []
     if uncertainty is None:
         uncertainty = np.std(np.array(a))
-    for i in a:
-        new_a.append(uFloat(i, uncertainty))
+    if isinstance(uncertainty, (list, tuple, np.ndarray)):
+        print(len(uncertainty), len(a))
+        if len(uncertainty) != len(a):
+            raise ValueError('Uncertainty arrays must be of equal length to their value arrays')
+        for i,j in zip(a, uncertainty):
+            new_a.append(uFloat(i, j))
+    else:
+        for i in a:
+            new_a.append(uFloat(i, uncertainty))
     return uArray(new_a)
 
 def zeros(x):
@@ -61,6 +72,115 @@ def linspace(start, stop, length, uncertainty = 0, retstep = False):
     else:
         error = 'Argument retstep must be of type <bool>'
         raise SyntaxError(error)
+
+def plot(x, y, title = None, xlabel = None, ylabel = None, savename = None,
+xlim = None, ylim = None, legend = None, proportional = False, border = None,
+style = None, ms = None, filetype = 'pdf', hold = False):
+
+    def _plot(x, y, style, ms, alpha = None):
+        if alpha is None:
+            alpha = 1
+        if style is not None and ms is not None:
+            plt.plot(x, y, style, ms = ms, alpha = alpha)
+        elif style is not None and ms is None:
+            plt.plot(x, y, style, alpha = alpha)
+        elif style is None and ms is not None:
+            plt.plot(x, y, ms = ms, alpha = alpha)
+        else:
+            plt.plot(x, y, alpha = alpha)
+
+    if style is None:
+        style = 'b-'
+
+    if isinstance(x, np.ndarray):
+        x = list(x)
+    if isinstance(y, np.ndarray):
+        y = list(y)
+
+    if isinstance(x, uArray):
+        x = x.values
+
+    if isinstance(y, uArray):
+        is_uarray = True
+        y = list([np.array(y.values),
+        np.array(y.values) + np.array(y.uncertainties),
+        np.array(y.values) - np.array(y.uncertainties)])
+        axis = [min(x), max(x), min(y[2]), max(y[1])]
+    else:
+        is_uarray = False
+        axis = [min(x), max(x), min(y), max(y)]
+
+    diff_x = axis[1] - axis[0]
+    diff_y = axis[3] - axis[2]
+
+    if xlim is not None and ylim is not None and border is not None:
+        raise ValueError('Cannot use argument <border> when xlim and ylim are both manually defined')
+
+    if proportional is True:
+        fig, ax= plt.subplots()
+        ax.set(aspect=1)
+
+    if is_uarray is True:
+        c = style[0]
+        if c == 'b':
+            c = 'r'
+        else:
+            c = 'b'
+        if style[1:] == '-':
+            _plot(x, y[0], style = style, ms = None, alpha = 0.7)
+            _plot(x, y[1], c + '-.', ms = None, alpha = 0.7)
+            _plot(x, y[2], c + '-.', ms = None, alpha = 0.7)
+            plt.fill_between(x, y[2], y[1], alpha = 0.25, color = c)
+        else:
+            _plot(x, y[0], style = style, ms = None, alpha = 0.7)
+            _plot(x, y[1], c + '|', ms = None, alpha = 0.7)
+            _plot(x, y[2], c + '|', ms = None, alpha = 0.7)
+    else:
+        _plot(x, y, style, ms)
+
+    if title is not None:
+        plt.title(title, fontsize = 26)
+
+    plt.xticks(fontsize = 22)
+    plt.yticks(fontsize = 22)
+    plt.grid(b = True, alpha = 0.3, linestyle = 'dashed')
+
+    if xlabel is not None:
+        plt.xlabel(xlabel, fontsize = 22)
+
+    if ylabel is not None:
+        plt.ylabel(ylabel, fontsize = 22)
+
+    if border is True:
+        border = [0.1, 0.1]
+    elif isinstance(border, (float, int)):
+        border = [border, border]
+
+    if xlim is not None:
+        plt.xlim([axis[0], axis[1]])
+    elif border is not None:
+        plt.xlim([axis[0]-diff_x*border[0], axis[1]+diff_x*border[0]])
+    else:
+        plt.xlim([axis[0], axis[1]])
+
+    if ylim is not None:
+        plt.ylim([axis[2], axis[3]])
+    elif border is not None:
+        plt.ylim([axis[2]-diff_y*border[1], axis[3]+diff_y*border[1]])
+    else:
+        plt.ylim([axis[2], axis[3]])
+
+    if legend is not None:
+        plt.legend(legend, ms = 18)
+
+    if hold is False:
+        if savename is not None:
+            fig = plt.gcf()
+            fig.set_size_inches((11.6, 6.5), forward=False)
+            plt.savefig('{}.{}'.format(savename, filetype))
+        else:
+            plt.show()
+        plt.close()
 
 class uFloat(object):
 
@@ -139,66 +259,6 @@ class uFloat(object):
 
     def __rsub__(self, x):
         return -self.__sub__(x)
-
-    '''INPLACE OPERATORS'''
-
-    def __iadd__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot add an object of type<uFloat>'
-            error += ' to object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__add__(x)
-
-    def __isub__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot subtract an object of type<uFloat>'
-            error += ' from object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__sub__(x)
-
-    def __imul__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot multiply an object of type<uFloat>'
-            error += ' with object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__mul__(x)
-
-    def __itruediv__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot multiply an object of type<uFloat>'
-            error += ' with object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__truediv__(x)
-
-    def __ifloordiv__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot multiply an object of type<uFloat>'
-            error += ' with object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__floordiv__(x)
-
-    def __imod__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot multiply an object of type<uFloat>'
-            error += ' with object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__mod__(x)
-
-    def __ipow__(self, x):
-        if not isinstance(x, (float, int, uFloat)):
-            error = 'Cannot multiply an object of type<uFloat>'
-            error += ' with object of type<{}>'.format(type(x))
-            raise TypeError(error)
-        else:
-            return self.__pow__(x)
-
-    '''MATHEMATICAL METHODS WIP'''
 
     def __mul__(self, x):
         x = self._get_type(x)
@@ -308,6 +368,64 @@ class uFloat(object):
     def sqrt(self):
         return self.__pow__(0.5)
 
+    '''INPLACE OPERATORS'''
+
+    def __iadd__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot add an object of type<uFloat>'
+            error += ' to object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__add__(x)
+
+    def __isub__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot subtract an object of type<uFloat>'
+            error += ' from object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__sub__(x)
+
+    def __imul__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot multiply an object of type<uFloat>'
+            error += ' with object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__mul__(x)
+
+    def __itruediv__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot multiply an object of type<uFloat>'
+            error += ' with object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__truediv__(x)
+
+    def __ifloordiv__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot multiply an object of type<uFloat>'
+            error += ' with object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__floordiv__(x)
+
+    def __imod__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot multiply an object of type<uFloat>'
+            error += ' with object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__mod__(x)
+
+    def __ipow__(self, x):
+        if not isinstance(x, (float, int, uFloat)):
+            error = 'Cannot multiply an object of type<uFloat>'
+            error += ' with object of type<{}>'.format(type(x))
+            raise TypeError(error)
+        else:
+            return self.__pow__(x)
+
     '''LOGIC'''
 
     def __eq__(self, x):
@@ -367,10 +485,12 @@ class uFloat(object):
     '''MISC METHODS'''
 
     def __str__(self):
-        return '{} ± {}'.format(self.value, self.uncertainty)
+        exp_digit = -np.floor(np.log10(self.uncertainty))
+        return '{} ± {}'.format(np.round(self.value, int(exp_digit)),
+        np.round(self.uncertainty, int(exp_digit)))
 
     def __repr__(self):
-        return '{} ± {}'.format(self.value, self.uncertainty)
+        return self.__str__()
 
     def __float__(self):
         return float(self.value)
@@ -382,7 +502,7 @@ class uFloat(object):
         error = '{{{}}} is an invalid uFloat format, use a number of 2-array'
         if s == '':
             return self.__str__()
-        if (s[-1] not in ['g','f','d']) or not isinstance(s, str):
+        elif (s[-1] not in ['g','f','d']) or not isinstance(s, str):
             raise SyntaxError(error)
         c1 = float(s[:-1])
         c2 = s[-1]
@@ -479,7 +599,14 @@ class uArray(object):
         new_a = self.__neg__(self.__sub__(x))
         return uArray(new_a)
 
-    '''MATHEMATICAL METHODS WIP'''
+    def dot(self, x):
+        new = uFloat(0, 0)
+        if isinstance(x, (list, tuple, np.ndarray, uArray)):
+            for i,j in zip(self.a, x):
+                new += i * j
+        else:
+            raise TypeError('Cannot apply dot() operator to uArray and {}'.format(type(x)))
+        return new
 
     def __mul__(self, x):
         new_a = []
@@ -588,6 +715,116 @@ class uArray(object):
         for i in self.a:
             new_a.append(i.sqrt())
         return uArray(new_a)
+
+    def mean(self):
+        new = 0
+        for i in self.a:
+            new += i
+        return new/self.__len__()
+
+    def min(self):
+        index = -1
+        min_value = None
+        min_uncertainty = None
+        multiple = 1
+        for n,i in enumerate(self.a):
+            if min_value is None or i.value < min_value:
+                index = n
+                min_value = i.value
+                min_uncertainty = i.uncertainty
+                multiple = 1
+            elif min_value == i.value:
+                multiple += 1
+                if i.uncertainty < min_uncertainty:
+                    index = n
+                    min_value = i.value
+                    min_uncertainty = i.uncertainty
+        if multiple > 1:
+            msg = "Array contains {} minima, returning minimum".format(multiple)
+            msg += " with lowest uncertainty."
+            warnings.warn(msg)
+        return self.a[index]
+
+    def max(self):
+        index = -1
+        max_value = None
+        max_uncertainty = None
+        multiple = 1
+        for n,i in enumerate(self.a):
+            if max_value is None or i.value > max_value:
+                index = n
+                max_value = i.value
+                max_uncertainty = i.uncertainty
+                multiple = 1
+            elif max_value == i.value:
+                multiple += 1
+                if i.uncertainty < max_uncertainty:
+                    index = n
+                    max_value = i.value
+                    max_uncertainty = i.uncertainty
+        if multiple > 1:
+            msg = "Array contains {} maxima, returning maximum".format(multiple)
+            msg += " with lowest uncertainty."
+            warnings.warn(msg)
+        return self.a[index]
+
+    def argmin(self):
+        index = -1
+        min_value = None
+        min_uncertainty = None
+        multiple = 1
+        for n,i in enumerate(self.a):
+            if min_value is None or i.value < min_value:
+                index = n
+                min_value = i.value
+                min_uncertainty = i.uncertainty
+                multiple = 1
+            elif min_value == i.value:
+                multiple += 1
+                if i.uncertainty < min_uncertainty:
+                    index = n
+                    min_value = i.value
+                    min_uncertainty = i.uncertainty
+        if multiple > 1:
+            msg = "Array contains {} minima, returning index".format(multiple)
+            msg += " of minimum with lowest uncertainty."
+            warnings.warn(msg)
+        return index
+
+    def argmax(self):
+        index = -1
+        max_value = None
+        max_uncertainty = None
+        multiple = 1
+        for n,i in enumerate(self.a):
+            if max_value is None or i.value > max_value:
+                index = n
+                max_value = i.value
+                max_uncertainty = i.uncertainty
+                multiple = 1
+            elif max_value == i.value:
+                multiple += 1
+                if i.uncertainty < max_uncertainty:
+                    index = n
+                    max_value = i.value
+                    max_uncertainty = i.uncertainty
+        if multiple > 1:
+            msg = "Array contains {} maxima, returning index".format(multiple)
+            msg += " of maximum with lowest uncertainty."
+            warnings.warn(msg)
+        return index
+
+    def sum(self):
+        new = self.a[0]
+        for i in self.a[1:]:
+            new += i
+        return new
+
+    def prod(self):
+        new = self.a[0]
+        for i in self.a[1:]:
+            new *= i
+        return new
 
     '''INPLACE OPERATORS'''
 
@@ -747,6 +984,12 @@ class uArray(object):
             TypeError(error)
         new_a = self.a + [x]
         self.__init__(new_a)
+
+    def __missing__(self, x):
+        if isinstance(x, ('int', 'slice')):
+            raise ValueError('Index [{}] is out of bounds for uArray object'.format(x))
+        else:
+            raise ValueError('Must use <int> or <slice> when getting item from uArray')
 
 if __name__ == '__main__':
     pass
