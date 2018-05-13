@@ -75,7 +75,17 @@ def linspace(start, stop, length, uncertainty = 0, retstep = False):
 
 def plot(x, y, title = None, xlabel = None, ylabel = None, savename = None,
 xlim = None, ylim = None, legend = None, proportional = False, border = None,
-style = None, ms = None, filetype = 'pdf', hold = False):
+style = None, ms = None, filetype = 'pdf', hold = False, log = False):
+
+    if log is False:
+        log = [False, False]
+    elif log is True:
+        log = [True, True]
+
+    if log[0] is True:
+        plt.xscale('log')
+    if log[1] is True:
+        plt.yscale('log')
 
     def _plot(x, y, style, ms, alpha = None):
         if alpha is None:
@@ -171,15 +181,19 @@ style = None, ms = None, filetype = 'pdf', hold = False):
         plt.ylim([axis[2], axis[3]])
 
     if legend is not None:
-        plt.legend(legend, ms = 18)
+        plt.legend(legend, fontsize = 18)
 
     if hold is False:
         if savename is not None:
             fig = plt.gcf()
             fig.set_size_inches((11.6, 6.5), forward=False)
             plt.savefig('{}.{}'.format(savename, filetype))
+            plt.xscale('linear')
+            plt.yscale('linear')
         else:
-            plt.show()
+            plt.show
+            plt.xscale('linear')
+            plt.yscale('linear')
         plt.close()
 
 class uFloat(object):
@@ -596,8 +610,8 @@ class uArray(object):
         return uArray(new_a)
 
     def __rsub__(self, x):
-        new_a = self.__neg__(self.__sub__(x))
-        return uArray(new_a)
+        new_a = (self.__sub__(x)).__neg__()
+        return new_a
 
     def dot(self, x):
         new = uFloat(0, 0)
