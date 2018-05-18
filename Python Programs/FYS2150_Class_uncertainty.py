@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-from matplotlib import rc
 import numpy as np
 import warnings
-rc('text', usetex = True)
 
 def list_to_uArray(a, uncertainty = None):
     if not isinstance(a, (list, tuple, np.ndarray)):
@@ -218,6 +216,10 @@ class uFloat(object):
     '''
 
     def __init__(self, value, uncertainty = None):
+        if isinstance(value, complex):
+            msg = 'Only the Real part of a complex value will be kept when generating a uFloat'
+            warnings.warn(msg)
+            value = real(value)
         try:
             self.value = float(value)
         except:
@@ -731,10 +733,13 @@ class uArray(object):
         return uArray(new_a)
 
     def mean(self):
-        new = 0
+        num = 0
+        den = 0
         for i in self.a:
-            new += i
-        return new/self.__len__()
+            num += i.value/(i.uncertainty**2)
+            den += 1/(i.uncertainty**2)
+        u = np.sqrt(1/den)
+        return uFloat(num/den, u)
 
     def min(self):
         index = -1
