@@ -1,7 +1,13 @@
 import numpy as np
+cu_imp = False
+try:
+    import Class_uncertainty as cU
+    cu_imp = True
+except:
+    pass
 
 def tex_table(a, caption, label, titles, vbars = None, hbars = None,
-sigfigs = 0.3):
+sigfigs = None):
     '''
         Automatically formats a LaTEX compatible table with a high degree of
         customizability.
@@ -24,15 +30,20 @@ sigfigs = 0.3):
         [1, 0, 0, ..., 0, 1].
 
         <hbars> (which is an optional parameter) must be an array of length n
-        of ones and zeros where a one represents a vertical bar in the chart,
-        and zero represents a lack thereof.  By default, it will be of the form
-        [1, 0, 0, ..., 0, 1].
+        of zeros, ones and twos where a one represents a horizontal bar in the
+        chart and zero represents a lack thereof; two represents a double-bar.
+        By default, it will be of the form [1, 0, 0, ..., 0, 1].
 
         <sigfigs> (which is an optional parameter) may be an integer OR an array
         of length m, with a particular significant figure for each column of
         data.  Note - these values should be in terms that can be interpreted
         in string formatting syntax (for example 0.1 for 1 sigfig after the dot).
     '''
+    if sigfigs is None:
+        sigfigs = 0.2
+        nosigfigs = True
+    else:
+        nosigfigs = False
     a_len = len(a)
     titles_len = len(titles)
     if a_len > titles_len:
@@ -68,9 +79,13 @@ sigfigs = 0.3):
     for i in range(len(a[0])):
         for n,(j,k) in enumerate(zip(a[:,i], sigfigs)):
             if isinstance(j, (int, float)):
+
                 string += '{:{width}f} '.format(float(j), width = k)
-            elif isinstance(j, (uFloat)):
-                temp = '{:{width}g} '.format(j, width = k)
+            elif cu_imp is True and isinstance(j, (cU.uFloat)):
+                if nosigfigs is True:
+                    temp = '{}'.format(j)
+                else:
+                    temp = '{:{width}g} '.format(j, width = k)
                 temp = (temp.split('±'))
                 temp[0], temp[1] = temp[0].strip(), temp[1].strip()
                 if j.uncertainty != 0:
@@ -95,7 +110,9 @@ sigfigs = 0.3):
                 string += '{} '.format(j)
             if n < a_len - 1:
                 string += '& '
-        if hbars[i] == 1:
+        if hbars[i] == 2:
+            string += '\\\\\n\\hline\n\\hline\n'
+        elif hbars[i] == 1:
             string += '\\\\\n\\hline\n'
         elif hbars[i] == 0:
             string += '\\\\\n\n'
