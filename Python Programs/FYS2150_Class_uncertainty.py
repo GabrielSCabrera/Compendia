@@ -998,7 +998,10 @@ class uArray(object):
     def __str__(self):
         string = 'uArray('
         for i in range(self.size):
-            string += '{} ± {}'.format(self.values[i], self.uncertainties[i])
+            if self.uncertainties[i] == 0:
+                string += '{:g}'.format(self.values[i])
+            else:
+                string += '{}'.format(self.a[i])
             if i < self.size - 1:
                 string += ', '
         return string + ')'
