@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import warnings
 
+def list_to_uFloat(a):
+    a = np.array(a)
+    v = np.mean(a)
+    u = np.std(a)
+    return uFloat(v,u)
+
 def list_to_uArray(a, uncertainty = None):
     if not isinstance(a, (list, tuple, np.ndarray)):
         raise TypeError('Can only convert objects of type <list>, <tuple>, and <np.ndarray>')
@@ -9,7 +15,6 @@ def list_to_uArray(a, uncertainty = None):
     if uncertainty is None:
         uncertainty = np.std(np.array(a))
     if isinstance(uncertainty, (list, tuple, np.ndarray)):
-        print(len(uncertainty), len(a))
         if len(uncertainty) != len(a):
             raise ValueError('Uncertainty arrays must be of equal length to their value arrays')
         for i,j in zip(a, uncertainty):
@@ -241,14 +246,16 @@ class uFloat(object):
             self.relative_uncertainty = self.uncertainty/abs(self.value)
 
     def _get_type(self, x):
-        if not isinstance(x, uFloat):
+        if isinstance(x, np.ndarray):
+            return x
+        elif not isinstance(x, uFloat):
             try:
                 x = uFloat(x)
             except:
                 error = 'Cannot perform operation between types <uFloat> and <{}>'.\
                 format(type(x))
                 raise TypeError(error)
-        return x
+            return x
 
     '''MATHEMATICAL METHODS'''
 
@@ -260,91 +267,174 @@ class uFloat(object):
 
     def __add__(self, x):
         x = self._get_type(x)
-        value = self.value + x.value
-        uncertainty = np.sqrt(self.uncertainty**2 + x.uncertainty**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                value = self.value + i
+                new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            value = self.value + x.value
+            uncertainty = np.sqrt(self.uncertainty**2 + x.uncertainty**2)
+            return uFloat(value, uncertainty)
 
     def __radd__(self, x):
         return self.__add__(x)
 
     def __sub__(self, x):
         x = self._get_type(x)
-        value = self.value - x.value
-        uncertainty = np.sqrt(self.uncertainty**2 + x.uncertainty**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                value = self.value - i
+                new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            value = self.value - x.value
+            uncertainty = np.sqrt(self.uncertainty**2 + x.uncertainty**2)
+            return uFloat(value, uncertainty)
 
     def __rsub__(self, x):
         return -self.__sub__(x)
 
     def __mul__(self, x):
         x = self._get_type(x)
-        value = self.value*x.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                value = self.value*i
+                new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            value = self.value*x.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __rmul__(self, x):
         return self.__mul__(x)
 
     def __truediv__(self, x):
         x = self._get_type(x)
-        if x.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
-            .format(self.value, x.value))
-        value = self.value/x.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                if i == 0:
+                    new.append(np.nan)
+                else:
+                    value = self.value/i
+                    new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            if x.value == 0:
+                raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+                .format(self.value, x.value))
+            value = self.value/x.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __rtruediv__(self, x):
         x = self._get_type(x)
-        if self.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
-            .format(x.value, self.value))
-        value = x.value/self.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                if self.value == 0:
+                    new.append(np.nan)
+                else:
+                    value = i/self.value
+                    new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            if self.value == 0:
+                raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+                .format(x.value, self.value))
+            value = x.value/self.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __floordiv__(self, x):
         x = self._get_type(x)
-        if x.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
-            .format(self.value, x.value))
-        value = self.value//x.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                if i == 0:
+                    new.append(np.nan)
+                else:
+                    value = self.value//i
+                    new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            if x.value == 0:
+                raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+                .format(self.value, x.value))
+            value = self.value//x.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __rfloordiv__(self, x):
         x = self._get_type(x)
-        if self.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
-            .format(x.value, self.value))
-        value = x.value//self.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        x = self._get_type(x)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                if self.value == 0:
+                    new.append(np.nan)
+                else:
+                    value = i/self.value
+                    new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            if self.value == 0:
+                raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+                .format(x.value, self.value))
+            value = x.value//self.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __mod__(self, x):
         x = self._get_type(x)
-        if x.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
-            .format(self.value, x.value))
-        value = self.value % x.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                if i == 0:
+                    new.append(np.nan)
+                else:
+                    value = self.value%i
+                    new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            if x.value == 0:
+                raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+                .format(self.value, x.value))
+            value = self.value % x.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __rmod__(self, x):
         x = self._get_type(x)
-        if self.value == 0:
-            raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
-            .format(x.value, self.value))
-        value = x.value % self.value
-        uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
-        (x.relative_uncertainty)**2)
-        return uFloat(value, uncertainty)
+        x = self._get_type(x)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                if self.value == 0:
+                    new.append(np.nan)
+                else:
+                    value = i%self.value
+                    new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            if self.value == 0:
+                raise ZeroDivisionError('Cannot divide by zero ({}/{})'\
+                .format(x.value, self.value))
+            value = x.value % self.value
+            uncertainty = value*np.sqrt((self.relative_uncertainty)**2 + \
+            (x.relative_uncertainty)**2)
+            return uFloat(value, uncertainty)
 
     def __pow__(self, x):
         try:
@@ -353,9 +443,16 @@ class uFloat(object):
             error = 'Cannot perform exponentiation between types <uFloat> and <{}>'.\
             format(type(x))
             raise TypeError(error)
-        value = self.value**x
-        uncertainty = value*x*self.relative_uncertainty
-        return uFloat(value, uncertainty)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                value = self.value**i
+                new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, float):
+            value = self.value**x
+            uncertainty = value*x*self.relative_uncertainty
+            return uFloat(value, uncertainty)
 
     def __rpow__(self, x):
         try:
@@ -364,7 +461,14 @@ class uFloat(object):
             error = 'Cannot perform exponentiation between types <{}> and <uFloat>'.\
             format(type(x))
             raise TypeError(error)
-        return x.__pow__(self)
+        if isinstance(x, np.ndarray):
+            new = []
+            for i in x:
+                value = i**self.value
+                new.append(uFloat(value, self.uncertainty))
+            return uArray(new)
+        elif isinstance(x, uFloat):
+            return x.__pow__(self)
 
     def ln(self):
         value = np.log(self.value)
@@ -501,9 +605,12 @@ class uFloat(object):
     '''MISC METHODS'''
 
     def __str__(self):
-        exp_digit = -np.floor(np.log10(self.uncertainty))
-        return '{} ± {}'.format(np.round(self.value, int(exp_digit)),
-        np.round(self.uncertainty, int(exp_digit)))
+        if self.uncertainty == 0:
+            return '{:g}'.format(self.value)
+        else:
+            exp_digit = -np.floor(np.log10(self.uncertainty))
+            return '{:g} ± {:g}'.format(np.round(self.value, int(exp_digit)),
+            np.round(self.uncertainty, int(exp_digit)))
 
     def __repr__(self):
         return self.__str__()
@@ -736,8 +843,12 @@ class uArray(object):
         num = 0
         den = 0
         for i in self.a:
-            num += i.value/(i.uncertainty**2)
-            den += 1/(i.uncertainty**2)
+            if i.uncertainty != 0:
+                num += i.value/(i.uncertainty**2)
+                den += 1/(i.uncertainty**2)
+            else:
+                num += i.value
+                den += 1
         u = np.sqrt(1/den)
         return uFloat(num/den, u)
 
