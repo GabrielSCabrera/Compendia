@@ -115,7 +115,7 @@ sigfigs = None):
         elif hbars[i] == 1:
             string += '\\\\\n\\hline\n'
         elif hbars[i] == 0:
-            string += '\\\\\n\n'
+            string += '\\\\\n'
     string += r'\end{tabular}'
     string += '\n'
     string += r'\end{table}'
