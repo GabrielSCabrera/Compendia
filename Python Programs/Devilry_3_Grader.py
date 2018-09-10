@@ -3,7 +3,7 @@ This program helps grade students' deliveries in Devilry 3, when using the
 option labeled:    "Download Assignment"
 
 This file should be placed in the directory containing the downloaded and
-extracted folder; it should be called something like "in1900.2018h.week{X}"
+extracted folder; it should be called something like "in1900.2018h.weekX"
 
 Run this program in Python 3 to get started – available commands are:
 
@@ -12,6 +12,14 @@ N - Fail
 R - Rerun Script
 C - Comment
 Q - Quit
+
+To be able to run this program
+
+    [1]     Set variable "main_folder" equal to a string with the name of the
+    extracted folder.
+
+    [2]     Set variable "files_to_run" equal to a list of strings, where each
+    string is the name of one of the files you wish to grade.
 """
 
 import os, re, datetime, sys
@@ -19,8 +27,8 @@ from subprocess import Popen, PIPE, call, STDOUT
 
 #USER OPTIONS
 
-main_folder = "week1"
-files_to_run = ["interest_rate.py", "kick.py", "population.py"]
+main_folder = "in1900.2018h.week2"
+files_to_run = ["ball_table2.py", "ball_table3.py", "sum_while.py", "population_table.py"]
 
 #AUTOMATIC CONFIG
 
@@ -37,8 +45,10 @@ class Student(object):
         self.username = re.sub(r"group-(\w+) -.*", r"\1", self.student_folder)
         dir = os.listdir("{}/{}"\
         .format(globals()['main_folder'], self.student_folder))[0]
-        self.rootpath = "{}/{}/delivery/".format(path, dir)
-        self.relpath = "{}/{}/{}/delivery"\
+        #self.rootpath = "{}/{}/delivery/".format(path, dir)
+        self.rootpath = "{}/{}/".format(path, dir)
+        #self.relpath = "{}/{}/{}/delivery"\
+        self.relpath = "{}/{}/{}"\
         .format(globals()["main_folder"], self.student_folder, dir)
         self.deadline = re.sub(r"deadline(\d{4}-\d{2}-\d{2}) .*", r"\1", dir)
         self.present = self.check_files_present()
@@ -253,7 +263,7 @@ def gen_students():
     students = {}
     for d in dirs:
         students_list.append(Student("{}/{}".format(main_path, d)))
-    for s in students_list[:2]:
+    for s in students_list:
         students[s.username] = s
     return students
 
